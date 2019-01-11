@@ -1,5 +1,6 @@
 ---
 title: Hello World
+date: 2018-11-26 17:20:15
 categories: 崩塌解体的磁盘碎片
 tag: 初始化
 ---
