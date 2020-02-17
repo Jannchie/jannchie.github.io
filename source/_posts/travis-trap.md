@@ -27,4 +27,6 @@ bad decrypt
 
 总之，我使用Ubuntu子系统进行加密，就不会出现这个问题了。
 
-Travis cli 和 Windows 之间，必有一个辣鸡，我倾向于 Travis 是辣鸡（逃。
+这其实并不是Windows的问题，但这里体现了，编程最好还是使用Linux系统。因为其他程序员以Linux优先，很可能无法顾及Windows用户。
+
+归根结底，是Travis-ci的工程师辣鸡！
