@@ -1,0 +1,374 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description"><title>计算机组成原理/流水线 | Jannchie's Tech Blog</title><link rel="stylesheet" type="text/css" href="/css/style.css?v=0.0.0"><link rel="stylesheet" type="text/css" href="//lib.baomitu.com/normalize/8.0.1/normalize.min.css"><link rel="stylesheet" type="text/css" href="//lib.baomitu.com/pure/1.0.0/pure-min.css"><link rel="stylesheet" type="text/css" href="//lib.baomitu.com/pure/1.0.0/grids-responsive-min.css"><link rel="stylesheet" href="//lib.baomitu.com/font-awesome/4.7.0/css/font-awesome.min.css"><script type="text/javascript" src="//lib.baomitu.com/jquery/3.4.0/jquery.min.js"></script><link rel="icon" mask="" sizes="any" href="/favicon.ico"><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"><meta name="generator" content="Hexo 4.2.0"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">计算机组成原理/流水线</h1><a id="logo" href="/.">Jannchie's Tech Blog</a><p class="description">Simply record what I have learned</p></div><div id="nav-menu"><a class="current" href="/."><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i class="fa fa-archive"> 归档</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a></div></div><div class="pure-g" id="layout"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">计算机组成原理/流水线</h1><div class="post-meta">Mar 28, 2020</div><div class="post-content"><h1 id="流水线"><a href="#流水线" class="headerlink" title="流水线"></a>流水线</h1><h2 id="命令执行方式"><a href="#命令执行方式" class="headerlink" title="命令执行方式"></a>命令执行方式</h2><h3 id="シングルサイクル"><a href="#シングルサイクル" class="headerlink" title="シングルサイクル"></a>シングルサイクル</h3><ul>
+<li>CPI = 1</li>
+<li>Clock按照以执行最慢的命令为准</li>
+</ul>
+<h3 id="可変長クロックサイクル"><a href="#可変長クロックサイクル" class="headerlink" title="可変長クロックサイクル"></a>可変長クロックサイクル</h3><ul>
+<li>CPI = 1</li>
+<li>Clock自动根据命令长度缩放</li>
+<li>电路复杂，难以实现</li>
+</ul>
+<h3 id="マルチサイクル"><a href="#マルチサイクル" class="headerlink" title="マルチサイクル"></a>マルチサイクル</h3><ul>
+<li>CPU時間 = 实行命令数 <em> CPI </em> 钟周期时间</li>
+<li>一条命令在多个时钟周期内网</li>
+</ul>
+<h2 id="流水线-1"><a href="#流水线-1" class="headerlink" title="流水线"></a>流水线</h2><p>每个命令可以大体分为五个步骤：</p>
+<ul>
+<li>IF: 取命令(命令フェッチ)</li>
+<li>ID: 译码，解析指令，生成控制信号(デコード)</li>
+<li>EX：执行</li>
+<li>MEM：访问内存</li>
+<li>WB：写回寄存器</li>
+</ul>
+<p>上述五个步骤使用的资源互不干扰，为了让CPU的所有步骤同时使用，我们可以使用流水线：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>1</th>
+<th>2</th>
+<th>3</th>
+<th>4</th>
+<th>5</th>
+<th>6</th>
+<th>7</th>
+<th>8</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>IF</td>
+<td>ID</td>
+<td>EX</td>
+<td>MA</td>
+<td>WB</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>2</td>
+<td></td>
+<td>IF</td>
+<td>ID</td>
+<td>EX</td>
+<td>MA</td>
+<td>WB</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>3</td>
+<td></td>
+<td></td>
+<td>IF</td>
+<td>ID</td>
+<td>EX</td>
+<td>MA</td>
+<td>WB</td>
+<td></td>
+</tr>
+<tr>
+<td>4</td>
+<td></td>
+<td></td>
+<td></td>
+<td>IF</td>
+<td>ID</td>
+<td>EX</td>
+<td>MA</td>
+<td>WB</td>
+</tr>
+</tbody>
+</table>
+<p>$$ 理想CPI =<br>\frac{总CLOCK}{总命令} = \frac{n+4 } {n} $$</p>
+<p>$$ \lim\limits {n \to \infty} CPI = 1 $$</p>
+<h3 id="冒泡-Bubble-バブル"><a href="#冒泡-Bubble-バブル" class="headerlink" title="冒泡 / Bubble / バブル"></a>冒泡 / Bubble / バブル</h3><p>流水线有时可能需要暂停等待。</p>
+<p>这时候会产生冒泡(空过clock)。</p>
+<p>由于CPU同时只能执行IF、ID、EX、MAM、WB中的一条命令，因此当某条命令产生了冒泡后，后续命令也需要添加冒泡停顿，使得bubble</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>1</th>
+<th>2</th>
+<th>3</th>
+<th>4</th>
+<th>5</th>
+<th>6</th>
+<th>7</th>
+<th>8</th>
+<th>9</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>IF</td>
+<td>ID</td>
+<td>EX</td>
+<td>MA</td>
+<td>WB</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>2</td>
+<td></td>
+<td>IF</td>
+<td></td>
+<td>ID</td>
+<td>EX</td>
+<td>MA</td>
+<td>WB</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>3</td>
+<td></td>
+<td></td>
+<td>IF</td>
+<td></td>
+<td>ID</td>
+<td>EX</td>
+<td>MA</td>
+<td>WB</td>
+<td></td>
+</tr>
+<tr>
+<td>4</td>
+<td></td>
+<td></td>
+<td></td>
+<td>IF</td>
+<td></td>
+<td>ID</td>
+<td>EX</td>
+<td>MA</td>
+<td>WB</td>
+</tr>
+</tbody>
+</table>
+<h3 id="ストール"><a href="#ストール" class="headerlink" title="ストール"></a>ストール</h3><h3 id="オーバヘッド-Overhead"><a href="#オーバヘッド-Overhead" class="headerlink" title="オーバヘッド  / Overhead"></a>オーバヘッド  / Overhead</h3><p>在流水线中，我们必须要使得每一步用时相同。也就是clock相同</p>
+<h3 id="冒险-ハザード"><a href="#冒险-ハザード" class="headerlink" title="冒险 / ハザード"></a>冒险 / ハザード</h3><p>流水线在某一个时间不能正常工作，叫做ハザード。</p>
+<h4 id="结构冒险-构造ハザード"><a href="#结构冒险-构造ハザード" class="headerlink" title="结构冒险 / 构造ハザード"></a>结构冒险 / 构造ハザード</h4><h5 id="出现原因"><a href="#出现原因" class="headerlink" title="出现原因"></a>出现原因</h5><p>上述假设，一条命令的五个步骤<strong>互相完全独立，不会抢占资源</strong>。</p>
+<p>但两条命令的不同步骤，可能会使用同一个资源：</p>
+<p>比如一条命令的ID读取的寄存器正好被另一条命令的WB读取时。</p>
+<h5 id="解决构造ハザード"><a href="#解决构造ハザード" class="headerlink" title="解决构造ハザード"></a>解决构造ハザード</h5><p>由于WB和ID命令都是<strong>对寄存器进行的操作</strong>，而对<strong>寄存器的操作非常快</strong>，WB和ID命令加起来的运行时间也比一个时钟周期长，因此可以<strong>安排WB在一个时钟周期的前半段，ID在一个时钟周期的后半段</strong></p>
+<h4 id="控制冒险"><a href="#控制冒险" class="headerlink" title="控制冒险"></a>控制冒险</h4><p>当执行分歧命令，直到执行完毕之前，无法得知下一条执行的将是什么命令。</p>
+<h5 id="解决控制冒险"><a href="#解决控制冒险" class="headerlink" title="解决控制冒险"></a>解决控制冒险</h5><ul>
+<li>添加气泡：</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>时间</th>
+<th>1</th>
+<th>2</th>
+<th>3</th>
+<th>4</th>
+<th>5</th>
+<th>6</th>
+<th>7</th>
+<th>8</th>
+<th>9</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>beq $1, $2, label</td>
+<td>IF</td>
+<td>ID</td>
+<td>EX</td>
+<td>MA</td>
+<td>WB</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>and $4, $2, $5</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>IF</td>
+<td>ID</td>
+<td>EX</td>
+<td>MA</td>
+<td>WB</td>
+</tr>
+</tbody>
+</table>
+<p>注：如果命令和数据存储在同一个MEMARY中，有可能出现MAM操作和IF操作的资源抢占，因此需要在MAM后面执行下一条操作。</p>
+<ul>
+<li><p>延迟分歧：</p>
+<ul>
+<li>将分歧延迟，先执行数条与分歧无关的命令，直到分歧执行完毕后执行分歧后的命令。</li>
+<li>思想很好，但是实现困难，难以判定哪些是分歧无关的命令</li>
+</ul>
+</li>
+<li><p>分歧预测: 预测分歧是否发生，先执行某一条路线，如果预测正确，则顺序，如果预测错误，则需要回滚，再执行另一个预测。</p>
+<ul>
+<li>静的预测: 永远只预测一种结果<ul>
+<li>在循环中，可能会出现大部分判定都支持调转的情况，在这种情况下很可能全部预测错误，造成大量浪费。</li>
+</ul>
+</li>
+<li>饱和计数器 / 饱和カウンター<ul>
+<li>每次产生分歧则升一级，未产生分歧则降一级，最高四级。</li>
+<li>是第0级则预测不分歧，其他情况预测分歧。</li>
+<li>分支指令必须连续选择某条分支两次，才能从强状态翻转，从而改变了预测的分支。</li>
+</ul>
+</li>
+<li>2级自适应预测器 / 2レベル适应型分歧预测：<ul>
+<li>对于不同类型的分支预测不同结果。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="数据冒险"><a href="#数据冒险" class="headerlink" title="数据冒险"></a>数据冒险</h4><p>考虑下列情况：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sub <span class="variable">$2</span>, <span class="variable">$1</span>, <span class="variable">$3</span></span><br><span class="line">and <span class="variable">$4</span>, <span class="variable">$2</span>, <span class="variable">$5</span></span><br><span class="line">and <span class="variable">$8</span>, <span class="variable">$7</span>, <span class="variable">$8</span></span><br></pre></td></tr></table></figure>
+<p>注：上述情况ID和WB做了冒险防止。</p>
+<p>简单的解决方法：冒泡。</p>
+<table>
+<thead>
+<tr>
+<th>时间</th>
+<th>1</th>
+<th>2</th>
+<th>3</th>
+<th>4</th>
+<th>5</th>
+<th>6</th>
+<th>7</th>
+<th>8</th>
+<th>9</th>
+<th>10</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>sub $2, $1, $3</td>
+<td>IF</td>
+<td>ID</td>
+<td>EX</td>
+<td>MA</td>
+<td>WB</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>and $4, $2, $5</td>
+<td></td>
+<td>IF</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>ID</td>
+<td>EX</td>
+<td>MA</td>
+<td>WB</td>
+<td></td>
+</tr>
+<tr>
+<td>and $8, $7, $8</td>
+<td></td>
+<td></td>
+<td>IF</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>ID</td>
+<td>EX</td>
+<td>MA</td>
+<td>WB</td>
+</tr>
+</tbody>
+</table>
+<h5 id="寄存器直通-数据前递（register-forwarding）"><a href="#寄存器直通-数据前递（register-forwarding）" class="headerlink" title="寄存器直通 / 数据前递（register forwarding）"></a>寄存器直通 / 数据前递（register forwarding）</h5><p>逻辑电路实现：</p>
+<ul>
+<li>相邻：EX-&gt;EX<ul>
+<li>上一条命令的EX和这一条命令的ID在同一个CLOCK执行完毕。</li>
+<li>上一条命令的EX里有真实的数据，ID取到的是过期的数据。</li>
+<li>将上条命令的EX结果也传入这条命令的EX，加一个选择电路选择正确的值。</li>
+</ul>
+</li>
+<li>隔一行: MAM-&gt;EX</li>
+</ul>
+<p>不能完美解决load命令的冲突问题</p>
+<h5 id="乱序执行-Out-Of-Order"><a href="#乱序执行-Out-Of-Order" class="headerlink" title="乱序执行 / Out Of Order"></a>乱序执行 / Out Of Order</h5><ul>
+<li>数据依存：强顺序相关<ul>
+<li>フロー依存： RAW</li>
+<li>逆依存： WAR</li>
+<li>出力依存： WAW</li>
+</ul>
+</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>W</th>
+<th>R</th>
+<th>R</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>r1</td>
+<td>r4</td>
+<td>r7</td>
+</tr>
+<tr>
+<td>2</td>
+<td>r8</td>
+<td>r5</td>
+<td>1</td>
+</tr>
+<tr>
+<td>3</td>
+<td>r6</td>
+<td>r6</td>
+<td>r3</td>
+</tr>
+<tr>
+<td>4</td>
+<td>r4</td>
+<td>r5</td>
+<td>r6</td>
+</tr>
+<tr>
+<td>5</td>
+<td>r7</td>
+<td>r8</td>
+<td>r4</td>
+</tr>
+</tbody>
+</table>
+<p>命令 x 与命令 x 关于 r 有 x 依存</p>
+<p>例：</p>
+<p>命令２と命令４はｒ６に関してフロー依存がある。</p>
+<p>上述：</p>
+<p>フロー依存：24，34，45，56<br>逆依存：14，51<br>出力依存：無し</p>
+<h5 id="寄存器重命名"><a href="#寄存器重命名" class="headerlink" title="寄存器重命名"></a>寄存器重命名</h5><p>扩展寄存器的空间</p>
+<h4 id="流水线为什么不分得特别细？"><a href="#流水线为什么不分得特别细？" class="headerlink" title="流水线为什么不分得特别细？"></a>流水线为什么不分得特别细？</h4><p>分歧预测会变多，从而产生延迟。</p>
+</div><div class="tags"></div><div class="post-nav"><a class="pre" href="/2020/03/28/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/%E7%BC%93%E5%AD%98/">计算机组成原理/缓存</a><a class="next" href="/2020/02/23/Java/async/">解决Spring boot @Async 注解无效的问题</a></div><div id="container"></div><link rel="stylesheet" type="text/css" href="//unpkg.com/gitalk/dist/gitalk.css?v=0.0.0"><script type="text/javascript" src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js?v=0.0.0"></script><script type="text/javascript" src="//unpkg.com/gitalk/dist/gitalk.min.js?v=0.0.0"></script><script>var gitalk = new Gitalk({
+  clientID: 'cec926d12f8f6eee59fa',
+  clientSecret: '46b678447e636b7cdc2a918efdb382f9fa7d1d09',
+  repo: 'jannchie.github.io',
+  owner: 'jannchie',
+  admin: ['jannchie'],
+  id: md5(location.pathname),
+  distractionFreeMode: false
+})
+gitalk.render('container')
+</script></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><form class="search-form" action="//www.google.com/search" method="get" accept-charset="utf-8" target="_blank"><input type="text" name="q" maxlength="20" placeholder="Search"/><input type="hidden" name="sitesearch" value="http://jannchie.github.com"/></form></div><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> 分类</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%91%BD%E6%82%AC%E4%B8%80%E7%BA%BF%E7%9A%84%E7%83%AD%E9%83%A8%E7%BD%B2/">命悬一线的热部署</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%B4%A9%E5%A1%8C%E8%A7%A3%E4%BD%93%E7%9A%84%E7%A3%81%E7%9B%98%E7%A2%8E%E7%89%87/">崩塌解体的磁盘碎片</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%BD%A2%E8%80%8C%E4%B8%8A%E7%9A%84%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/">形而上的最佳实践</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%95%B0%E5%AD%A6/">数学</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%9C%89%E9%99%90%E6%B7%B1%E5%BA%A6%E7%9A%84%E5%A4%A9%E5%9D%91/">有限深度的天坑</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%B0%B8%E6%97%A0%E4%BC%91%E6%AD%A2%E7%9A%84%E4%BA%89%E8%AE%BA/">永无休止的争论</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E8%87%AA%E7%94%B1%E6%94%AF%E9%85%8D%E7%9A%84%E5%8F%B9%E6%9C%8D/">自由支配的叹服</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E8%B8%8F%E5%90%91%E5%BE%81%E9%80%94%E7%9A%84%E8%BD%A8%E8%BF%B9/">踏向征途的轨迹</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> 标签</i></div><div class="tagcloud"><a href="/tags/%E5%8D%95%E8%AF%8D%E9%A6%85%E9%A5%BC/" style="font-size: 15px;">单词馅饼</a> <a href="/tags/BiliOB%E8%A7%82%E6%B5%8B%E8%80%85/" style="font-size: 15px;">BiliOB观测者</a> <a href="/tags/%E8%87%AA%E5%8A%A8%E5%8C%96/" style="font-size: 15px;">自动化</a> <a href="/tags/%E6%9E%84%E5%BB%BA/" style="font-size: 15px;">构建</a> <a href="/tags/%E5%89%8D%E7%AB%AF/" style="font-size: 15px;">前端</a> <a href="/tags/SEO/" style="font-size: 15px;">SEO</a> <a href="/tags/%E5%90%8E%E7%AB%AF/" style="font-size: 15px;">后端</a> <a href="/tags/Java/" style="font-size: 15px;">Java</a> <a href="/tags/Spring-Boot/" style="font-size: 15px;">Spring Boot</a> <a href="/tags/%E5%BC%80%E6%BA%90/" style="font-size: 15px;">开源</a> <a href="/tags/GitHub/" style="font-size: 15px;">GitHub</a> <a href="/tags/Git/" style="font-size: 15px;">Git</a> <a href="/tags/%E5%88%9D%E5%A7%8B%E5%8C%96/" style="font-size: 15px;">初始化</a> <a href="/tags/%E9%87%87%E8%AE%BF/" style="font-size: 15px;">采访</a> <a href="/tags/%E7%AE%97%E6%B3%95/" style="font-size: 15px;">算法</a> <a href="/tags/travis/" style="font-size: 15px;">travis</a> <a href="/tags/MongoDB/" style="font-size: 15px;">MongoDB</a> <a href="/tags/%E7%88%AC%E8%99%AB/" style="font-size: 15px;">爬虫</a> <a href="/tags/Scrapy/" style="font-size: 15px;">Scrapy</a> <a href="/tags/Python/" style="font-size: 15px;">Python</a> <a href="/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/" style="font-size: 15px;">消息队列</a> <a href="/tags/Redis/" style="font-size: 15px;">Redis</a> <a href="/tags/jieba/" style="font-size: 15px;">jieba</a> <a href="/tags/%E4%BC%98%E5%8C%96/" style="font-size: 15px;">优化</a> <a href="/tags/%E5%86%85%E5%AD%98/" style="font-size: 15px;">内存</a> <a href="/tags/CDN/" style="font-size: 15px;">CDN</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/" style="font-size: 15px;">数据库</a> <a href="/tags/Spring-boot/" style="font-size: 15px;">Spring boot</a> <a href="/tags/%E6%95%B0%E5%AD%A6/" style="font-size: 15px;">数学</a> <a href="/tags/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/" style="font-size: 15px;">线性代数</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> 最近文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2020/05/13/%E5%B7%A5%E7%A7%91%E6%95%B0%E5%AD%A6/%E5%BE%AE%E7%A7%AF%E5%88%86/%E5%A4%9A%E5%85%83%E5%87%BD%E6%95%B0%E7%9A%84%E5%BE%AE%E5%88%86/">工科数学/微积分/多元函数的微分</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/05/09/%E6%83%85%E6%8A%A5%E7%90%86%E8%AE%BA%EF%BC%88%E4%BF%A1%E6%81%AF%E8%AE%BA%EF%BC%89/%E6%83%85%E6%8A%A5%E7%90%86%E8%AE%BA1/">情报理论（信息论）/情报理论1</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/18/%E5%B7%A5%E7%A7%91%E6%95%B0%E5%AD%A6/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/%E8%8C%83%E5%BE%B7%E8%92%99%E8%A1%8C%E5%88%97%E5%BC%8F/">工科数学/线性代数/范德蒙行列式</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/18/%E7%94%B5%E8%B7%AF/%E8%BF%90%E7%AE%97%E6%94%BE%E5%A4%A7%E5%99%A8/">电路/运算放大器</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/18/%E7%94%B5%E8%B7%AF/%E7%94%B5%E6%B5%81%E5%92%8C%E7%94%B5%E5%8E%8B/">电路/电流和电压</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/17/%E5%B7%A5%E7%A7%91%E6%95%B0%E5%AD%A6/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/%E5%AF%B9%E7%A7%B0%E8%A1%8C%E5%88%97%E7%9A%84%E7%9B%B4%E4%BA%A4%E5%AF%B9%E8%A7%92%E5%8C%96/">对称行列的直交对角化</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/12/%E6%95%B0%E5%AD%A6/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/%E8%A1%8C%E5%88%97%E5%BC%8F/">行列式</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/12/%E6%95%B0%E5%AD%A6/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/A%E7%9A%84n%E6%AC%A1%E6%96%B9%E9%97%AE%E9%A2%98/">A的n次方问题</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/11/%E7%94%B5%E8%B7%AF/%E6%95%B0%E5%AD%97%E7%94%B5%E8%B7%AF%E5%9F%BA%E7%A1%80/">电路/数字电路基础</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/04/11/%E7%94%B5%E8%B7%AF/%E6%95%B0%E5%AD%97%E7%94%B5%E8%B7%AF/">电路/数字电路</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-external-link"> 友情链接</i></div><ul></ul><a href="https://www.biliob.com/" title="BiliOB观测者" target="_blank">BiliOB观测者</a></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer">Copyright © 2020 <a href="/." rel="nofollow">Jannchie's Tech Blog.</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div></div></div><a class="show" id="rocket" href="#top"></a><script type="text/javascript" src="/js/totop.js?v=0.0.0" async></script><script type="text/javascript" src="//lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=0.0.0" async></script><link rel="stylesheet" type="text/css" href="//lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css"><script type="text/javascript" src="/js/codeblock-resizer.js?v=0.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=0.0.0"></script></div></body></html>
