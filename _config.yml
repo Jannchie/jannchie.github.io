@@ -81,3 +81,6 @@ deploy:
   type: git 
   repo: git@github.com:Jannchie/jannchie.github.io.git
   branch: master
+
+mathjax: true
+mathjax2: true
